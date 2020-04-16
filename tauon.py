@@ -1642,6 +1642,7 @@ class GuiVar:   # Use to hold any variables for use in relation to UI
         self.tracklist_highlight_left = 0
 
         self.hide_tracklist_in_gallery = False
+        self.nav_bar = True
 
 gui = GuiVar()
 
@@ -17300,8 +17301,11 @@ def toggle_album_mode(force_on=False):
     global album_playlist_width
     global old_album_pos
 
-
+    gui.hide_tracklist_in_gallery = False
     gui.gall_tab_enter = False
+
+    if album_mode and force_on:
+        return
 
     if album_mode is True:
 
@@ -23708,7 +23712,7 @@ class TopPanel:
         self.ty = 0
 
         self.start_space_left = round(46 * gui.scale)
-        self.start_space_compact_left = 46 * gui.scale
+        self.start_space_compact_left = round(46 * gui.scale)
 
         self.tab_text_font = fonts.tabs
         self.tab_extra_width = round(17 * gui.scale)
@@ -23799,7 +23803,8 @@ class TopPanel:
 
         if coll(rect):
             if input.mouse_click:
-                gui.lsp ^= True
+                #gui.lsp ^= True
+                gui.nav_bar ^= True
 
                 update_layout = True
                 gui.update += 1
@@ -23824,12 +23829,14 @@ class TopPanel:
             colour = colours.corner_button_active
 
         if not a01:
-            if prefs.left_panel_mode == "artist list":
-                self.artist_list_icon.render(13 * gui.scale, yy + 8 * gui.scale, colour)
-            elif prefs.left_panel_mode == "folder view":
-                self.folder_list_icon.render(14 * gui.scale, yy + 8 * gui.scale, colour)
-            else:
-                self.playlist_icon.render(13 * gui.scale, yy + 8 * gui.scale, colour)
+            if gui.nav_bar:
+                pass
+            # elif prefs.left_panel_mode == "artist list":
+            #     self.artist_list_icon.render(13 * gui.scale, yy + 8 * gui.scale, colour)
+            # elif prefs.left_panel_mode == "folder view":
+            #     self.folder_list_icon.render(14 * gui.scale, yy + 8 * gui.scale, colour)
+            # else:
+            #     self.playlist_icon.render(13 * gui.scale, yy + 8 * gui.scale, colour)
 
         # if prefs.artist_list:
         #     self.artist_list_icon.render(13 * gui.scale, yy + 8 * gui.scale, colour)
@@ -28307,10 +28314,10 @@ class PlaylistBox:
             dark_mode = True
 
         show_scroll = False
-        tab_start = x + 10 * gui.scale
+        left = round(10 * gui.scale)
 
         if window_size[0] < 700 * gui.scale:
-            tab_start = x + 4 * gui.scale
+            left = round(4 * gui.scale)
 
         if mouse_wheel != 0 and coll((x, y, w, h)):
             self.scroll_on -= mouse_wheel
@@ -28328,10 +28335,12 @@ class PlaylistBox:
 
 
         if show_scroll:
-            tab_start += 15 * gui.scale
+            left += round(15 * gui.scale)
 
 
-        tab_width = w - tab_start - 6 * gui.scale
+        tab_width = w - left - 6 * gui.scale
+
+        tab_start = left + x
 
         # Draw scroll bar
         if show_scroll:
@@ -29996,6 +30005,104 @@ class TreeView:
         gui.update += 1
 
 tree_view_box = TreeView()
+
+
+class NavBar:
+
+    def __init__(self):
+        pass
+
+    def draw(self, x, y, w, h):
+        
+        left = x + round(10 * gui.scale)
+        wid = round(25 * gui.scale)
+        high = round(20 * gui.scale)
+        
+        yy = y + round(15 * gui.scale)
+
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [255, 0, 0, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            if prefs.left_panel_mode == "playlist":
+                prefs.left_panel_mode = "none"
+            else:
+                prefs.left_panel_mode = "playlist"
+
+        yy += round(28 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [0, 0, 255, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            if prefs.left_panel_mode == "artist list":
+                prefs.left_panel_mode = "none"
+            else:
+                prefs.left_panel_mode = "artist list"
+
+        yy += round(28 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [0, 255, 0, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            if prefs.left_panel_mode == "folder view":
+                prefs.left_panel_mode = "none"
+            else:
+                prefs.left_panel_mode = "folder view"
+
+        # ----------------------------
+
+        left = x + round(8 * gui.scale)
+        wid = round(30 * gui.scale)
+        high = round(24 * gui.scale)
+
+        yy += round(90 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [0, 255, 255, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            view_box.lyrics(True)
+
+        yy += round(30 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [255, 255, 0, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            view_box.tracks(True)
+
+        yy += round(30 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [255, 0, 255, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            view_box.side(True)
+
+
+        yy += round(30 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [50, 255, 100, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            toggle_album_mode(force_on=True)
+
+
+        yy += round(30 * gui.scale)
+        rect = (left, yy, wid, high)
+        ddt.rect(rect, [150, 40, 255, 200])
+        fields.add(rect)
+        if input.mouse_click and coll(rect):
+            gui.update_layout()
+            toggle_album_mode(force_on=True)
+            gui.hide_tracklist_in_gallery = True
+            gui.rspw = gui.pref_gallery_w
+
+nav_bar = NavBar()
 
 
 def queue_pause_deco():
@@ -32260,6 +32367,8 @@ class ViewBox:
 
     def gallery1(self, hit=False):
 
+        gui.hide_tracklist_in_gallery = False
+
         if hit is False:
             return album_mode is True and gui.show_playlist is True
 
@@ -33090,6 +33199,11 @@ def update_layout_do():
         if gui.lspw < 260 * gui.scale + round(15 * gui.scale) * max_insets:
             gui.lspw = 260 * gui.scale + round(15 * gui.scale) * max_insets
 
+    if prefs.left_panel_mode == "none":
+        gui.lspw = 0
+
+    if gui.nav_bar:
+        gui.lspw += top_panel.start_space_left
 
     # -----
 
@@ -33393,11 +33507,11 @@ def update_layout_do():
         gui.tracklist_highlight_left = highlight_left
         gui.tracklist_highlight_width = highlight_width
 
-        # if album_mode and gui.hide_tracklist_in_gallery:
-        #     gui.show_playlist = False
-        #     gui.rspw = window_size[0] - 46 * gui.scale
-        #     if gui.lsp:
-        #         gui.rspw -= gui.lspw
+        if album_mode and gui.hide_tracklist_in_gallery:
+            gui.show_playlist = False
+            gui.rspw = window_size[0] + round(2 * gui.scale)#- 46 * gui.scale
+            if gui.lsp:
+                gui.rspw -= gui.lspw
 
         # --------------------------------------------------------------------
 
@@ -36708,10 +36822,16 @@ while pctl.running:
             if (gui.artist_info_panel and not gui.combo_mode) and not (window_size[0] < 750 * gui.scale and album_mode):
                 artist_info_box.draw(gui.playlist_left, gui.panelY, gui.plw, gui.artist_panel_height)
 
+            if gui.lsp and gui.nav_bar:
+                nav_bar.draw(0, gui.panelY, top_panel.start_space_left, (window_size[1] - (gui.panelY + gui.panelBY)))
 
-            if gui.lsp and not gui.combo_mode:
+            if gui.lsp and not gui.combo_mode and prefs.left_panel_mode != "none":
 
                 # left side panel
+
+                left = 0
+                if gui.nav_bar:
+                    left = top_panel.start_space_left
 
                 h_estimate = ((playlist_box.tab_h + playlist_box.gap) * gui.scale * len(pctl.multi_playlist)) + 13 * gui.scale
 
@@ -36720,7 +36840,7 @@ while pctl.running:
 
                 pl_box_h = full
 
-                panel_rect = (0, gui.panelY, gui.lspw, pl_box_h)
+                panel_rect = (left, gui.panelY, gui.lspw - left, pl_box_h)
                 fields.add(panel_rect)
 
                 if gui.force_side_on_drag and not quick_drag and not coll(panel_rect):
@@ -36733,7 +36853,7 @@ while pctl.running:
 
 
                 if prefs.left_panel_mode == "folder view" and not gui.force_side_on_drag:
-                    tree_view_box.render(0, gui.panelY, gui.lspw, pl_box_h)
+                    tree_view_box.render(left, gui.panelY, gui.lspw - left, pl_box_h)
                 elif prefs.left_panel_mode == "artist list" and not gui.force_side_on_drag:
                     artist_list_box.render(*panel_rect)
                 else:
@@ -36754,13 +36874,13 @@ while pctl.running:
 
                     if prefs.show_playlist_list:
 
-                        playlist_box.draw(0, gui.panelY, gui.lspw, pl_box_h)
+                        playlist_box.draw(left, gui.panelY, gui.lspw - left, pl_box_h)
                     else:
                         pl_box_h = 0
 
                     if pctl.force_queue or preview_queue or not prefs.show_playlist_list or not prefs.hide_queue:
 
-                        queue_box.draw(0, gui.panelY + pl_box_h, gui.lspw, full - pl_box_h)
+                        queue_box.draw(left, gui.panelY + pl_box_h, gui.lspw - left, full - pl_box_h)
 
 
             # ------------------------------------------------
