@@ -30010,7 +30010,7 @@ tree_view_box = TreeView()
 class NavBar:
 
     def __init__(self):
-        pass
+        self.width = round(46 * gui.scale)
 
     def draw(self, x, y, w, h):
         
@@ -30021,7 +30021,7 @@ class NavBar:
         yy = y + round(15 * gui.scale)
 
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [255, 0, 0, 200])
+        ddt.rect(rect, [255, 0, 0, 200], prefs.left_panel_mode == "playlist")
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
@@ -30030,9 +30030,10 @@ class NavBar:
             else:
                 prefs.left_panel_mode = "playlist"
 
+
         yy += round(28 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [0, 0, 255, 200])
+        ddt.rect(rect, [0, 0, 255, 200], prefs.left_panel_mode == "artist list")
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
@@ -30041,9 +30042,10 @@ class NavBar:
             else:
                 prefs.left_panel_mode = "artist list"
 
+
         yy += round(28 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [0, 255, 0, 200])
+        ddt.rect(rect, [0, 255, 0, 200], prefs.left_panel_mode == "folder view")
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
@@ -30054,47 +30056,47 @@ class NavBar:
 
         # ----------------------------
 
-        left = x + round(8 * gui.scale)
-        wid = round(30 * gui.scale)
-        high = round(24 * gui.scale)
+        left = x + round(6 * gui.scale)
+        wid = round(35 * gui.scale)
+        high = round(25 * gui.scale)
 
         yy += round(90 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [0, 255, 255, 200])
+        ddt.rect(rect, [0, 255, 255, 200], view_box.lyrics())
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
             view_box.lyrics(True)
 
-        yy += round(30 * gui.scale)
+        yy += round(45 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [255, 255, 0, 200])
+        ddt.rect(rect, [255, 255, 0, 200], view_box.tracks())
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
             view_box.tracks(True)
 
-        yy += round(30 * gui.scale)
+        yy += round(45 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [255, 0, 255, 200])
+        ddt.rect(rect, [255, 0, 255, 200], view_box.side())
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
             view_box.side(True)
 
 
-        yy += round(30 * gui.scale)
+        yy += round(45 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [50, 255, 100, 200])
+        ddt.rect(rect, [50, 255, 100, 200], view_box.gallery1() and not gui.hide_tracklist_in_gallery)
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
             toggle_album_mode(force_on=True)
 
 
-        yy += round(30 * gui.scale)
+        yy += round(45 * gui.scale)
         rect = (left, yy, wid, high)
-        ddt.rect(rect, [150, 40, 255, 200])
+        ddt.rect(rect, [150, 40, 255, 200], gui.hide_tracklist_in_gallery)
         fields.add(rect)
         if input.mouse_click and coll(rect):
             gui.update_layout()
@@ -32367,8 +32369,6 @@ class ViewBox:
 
     def gallery1(self, hit=False):
 
-        gui.hide_tracklist_in_gallery = False
-
         if hit is False:
             return album_mode is True and gui.show_playlist is True
 
@@ -33203,7 +33203,7 @@ def update_layout_do():
         gui.lspw = 0
 
     if gui.nav_bar:
-        gui.lspw += top_panel.start_space_left
+        gui.lspw += nav_bar.width
 
     # -----
 
@@ -36823,7 +36823,7 @@ while pctl.running:
                 artist_info_box.draw(gui.playlist_left, gui.panelY, gui.plw, gui.artist_panel_height)
 
             if gui.lsp and gui.nav_bar:
-                nav_bar.draw(0, gui.panelY, top_panel.start_space_left, (window_size[1] - (gui.panelY + gui.panelBY)))
+                nav_bar.draw(0, gui.panelY, nav_bar.width, (window_size[1] - (gui.panelY + gui.panelBY)))
 
             if gui.lsp and not gui.combo_mode and prefs.left_panel_mode != "none":
 
@@ -36831,7 +36831,7 @@ while pctl.running:
 
                 left = 0
                 if gui.nav_bar:
-                    left = top_panel.start_space_left
+                    left = nav_bar.width
 
                 h_estimate = ((playlist_box.tab_h + playlist_box.gap) * gui.scale * len(pctl.multi_playlist)) + 13 * gui.scale
 
